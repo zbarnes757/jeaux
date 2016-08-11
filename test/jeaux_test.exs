@@ -32,18 +32,28 @@ defmodule JeauxTest do
     assert result[:foo] === "bar"
   end
 
-  test "throws error when param should be string but isn't" do
+  test "converts param to string when able" do
     params = %{foo: 1}
     schema = %{foo!: :string}
 
-    {status, message} = Jeaux.validate(params, schema)
+    {status, result} = Jeaux.validate(params, schema)
 
-    assert status === :error
-    assert message === "foo must be a string."
+    assert status === :ok
+    assert result[:foo] === "1"
+  end
+
+  test "converts param to float when able" do
+    params = %{foo: 1}
+    schema = %{foo!: :float}
+
+    {status, result} = Jeaux.validate(params, schema)
+
+    assert status === :ok
+    assert result[:foo] === 1.0
   end
 
   test "throws error when param should be float but isn't" do
-    params = %{foo: 1}
+    params = %{foo: "cat"}
     schema = %{foo!: :float}
 
     {status, message} = Jeaux.validate(params, schema)
@@ -80,6 +90,16 @@ defmodule JeauxTest do
 
     assert status === :error
     assert message === "foo must be less than or equal to 1"
+  end
+
+  test "throws error when param is not in schema" do
+    params = %{foo: 1, bar: "not in schema"}
+    schema = %{foo!: [type: :integer, max: 1]}
+
+    {status, message} = Jeaux.validate(params, schema)
+
+    assert status === :error
+    assert message === "bar is not a valid parameter"
   end
 
   test "works with multiple params" do

@@ -3,6 +3,7 @@ defmodule Jeaux.Params do
     params
     |> apply_defaults(schema)
     |> validate_required(schema)
+    |> parse_into_types(schema)
     |> validate_types(schema)
     |> validate_min(schema)
     |> validate_max(schema)
@@ -38,6 +39,13 @@ defmodule Jeaux.Params do
     end
   end
 
+  defp parse_into_types({:error, message}, _schema), do: {:error, message}
+  defp parse_into_types({:ok, params}, schema) do
+    params_keys = Map.keys(params)
+
+    {:ok, check_and_format_types(params, schema, params_keys)}
+  end
+
   defp validate_types({:error, message}, _schema), do: {:error, message}
   defp validate_types({:ok, params}, schema) do
     errors = Enum.reduce params, [], fn {k, v}, error_list  ->
@@ -53,6 +61,42 @@ defmodule Jeaux.Params do
         first_error
     end
   end
+
+  defp check_and_format_types(params, _schema, []), do: params
+  defp check_and_format_types(params, schema, [k | tail]) do
+    expected_type = Keyword.get(schema[k] || [], :type)
+
+    is_expected? =
+      case expected_type do
+        :string  -> is_binary(params[k])
+        :float   -> is_float(params[k])
+        :integer -> is_integer(params[k])
+        nil      -> true
+      end
+
+      case is_expected? do
+        true  -> Map.put(check_and_format_types(params, schema, tail), k, params[k])
+        false ->
+          parsed_value = try_to_parse(params[k], expected_type)
+          Map.put(check_and_format_types(params, schema, tail), k, parsed_value)
+      end
+  end
+
+  defp try_to_parse(value, :string), do: to_string(value)
+  defp try_to_parse(value, :float) when is_integer(value), do: String.to_float("#{value}.0")
+  defp try_to_parse(value, :float) when is_binary(value) do
+    case Float.parse(value)  do
+      {v, _} -> v
+      :error -> value
+    end
+  end
+  defp try_to_parse(value, :integer) when is_binary(value) do
+    case Integer.parse(value)  do
+      {v, _} -> v
+      :error -> value
+    end
+  end
+  defp try_to_parse(value, :integer) when is_float(value), do: round(value)
 
   defp validate_min({:error, message}, _schema), do: {:error, message}
   defp validate_min({:ok, params}, schema) do
@@ -102,23 +146,23 @@ defmodule Jeaux.Params do
     end
   end
 
-  defp validate_type(_param, _schema, nil), do: []
   defp validate_type({k, _v}, nil, _type), do: [{:error, "#{k} is not a valid parameter"}]
-  defp validate_type({k, v}, _schema, type) when type === :integer do
+  defp validate_type(_param, _schema, nil), do: []
+  defp validate_type({k, v}, _schema, :integer) do
     case is_integer(v) do
       true  -> []
       false -> [{:error, "#{k} must be an integer."}]
     end
   end
 
-  defp validate_type({k, v}, _schema, type) when type === :float do
+  defp validate_type({k, v}, _schema, :float) do
     case is_float(v) do
       true  -> []
       false -> [{:error, "#{k} must be a float."}]
     end
   end
 
-  defp validate_type({k, v}, _schema, type) when type === :string do
+  defp validate_type({k, v}, _schema, :string) do
     case is_binary(v) do
       true  -> []
       false -> [{:error, "#{k} must be a string."}]
