@@ -19,8 +19,9 @@ Right now it only supports validating params but I would like to be able to deep
 Example:
 
 ```elixir
-def index(conn, %{"lon" => lon, "lat" => lat} = params) do
-    case Jeaux.validate(params, %{lat!: :float, lon!: :float, radius: [field: :integer, default: 100, min: 1, max: 100]}) do
+# web/controllers/my_controller.ex
+def index(conn, params) do
+    case Jeaux.validate(params, %{lat!: :float, lon!: :float, radius: [type: :integer, default: 100, min: 1, max: 100]}) do
       {:ok, valid_params} -> do_your_thing(valid_params)
       {:error, message} -> Explode.bad_request(conn, message)
     end
@@ -29,7 +30,13 @@ end
 
 Using a `!` in your key denotes it is required.
 
-Currently only validates presence, type (and only strings, floats, and integers), min, max, and adds defaults.
+Currently, the following keys are valid:
+* `type:` with `:integer`, `:string`, or `:float` as applicable types
+* `default:` Sets a default value if none is currently provided in params
+* `min:` Minimum value a param can have
+* `max:` Maximum value a param can have
+
+It is important to note that no matter how params are passed in to Jeaux, they will be returned with keys as atoms.
 
 If you want to contribute, feel free to fork and open a pr.
 
