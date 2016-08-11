@@ -102,6 +102,20 @@ defmodule JeauxTest do
     assert message === "bar is not a valid parameter"
   end
 
+  test "works with strings as map keys" do
+    params = %{"id" => "an-id", "radius" => "100"}
+    schema = %{
+      "id!"     => :string,
+      "radius"  => [type: :integer, default: 100, min: 1, max: 100]
+    }
+
+    {status, result} = Jeaux.validate(params, schema)
+
+    assert status          === :ok
+    assert result[:id]    === "an-id"
+    assert result[:radius] === 100
+  end
+
   test "works with multiple params" do
     params = %{lat: 0.0, lon: 0.0}
     schema = %{lat!: :float, lon!: :float, radius: [type: :integer, default: 100, min: 1, max: 100]}

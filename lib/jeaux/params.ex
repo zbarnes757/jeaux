@@ -1,12 +1,26 @@
 defmodule Jeaux.Params do
   def compare(params, schema) do
     params
+    |> keys_to_atoms
     |> apply_defaults(schema)
     |> validate_required(schema)
     |> parse_into_types(schema)
     |> validate_types(schema)
     |> validate_min(schema)
     |> validate_max(schema)
+  end
+
+  defp keys_to_atoms(params) do
+    keys = Map.keys(params)
+    convert_all_keys(keys, params)
+  end
+
+  defp convert_all_keys([], _params), do: %{}
+  defp convert_all_keys([k | tail], params) do
+    case is_binary(k) do
+      true  -> Map.put(convert_all_keys(tail, params), String.to_atom(k) , params[k])
+      false -> Map.put(convert_all_keys(tail, params), k, params[k])
+    end
   end
 
   defp apply_defaults(params, schema) do
