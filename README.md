@@ -1,5 +1,8 @@
 # Jeaux
 
+[![Hex.pm](https://img.shields.io/hexpm/v/jeaux.svg)](https://hex.pm/packages/jeaux)
+[![Build Status](https://travis-ci.org/zbarnes757/jeaux.svg?branch=master)](https://travis-ci.org/zbarnes757/jeaux)
+
 Jeaux is my attempt at building a light and easy schema validator.
 
 ## Installation
@@ -20,8 +23,14 @@ Example:
 
 ```elixir
 # web/controllers/my_controller.ex
+@params_schema %{
+  lat!: :float,
+  lon!: :float,
+  radius: [type: :integer, default: 100, min: 1, max: 100]
+}
+
 def index(conn, params) do
-    case Jeaux.validate(params, %{lat!: :float, lon!: :float, radius: [type: :integer, default: 100, min: 1, max: 100]}) do
+    case Jeaux.validate(params, @params_schema) do
       {:ok, valid_params} -> do_your_thing(valid_params)
       {:error, message} -> Explode.bad_request(conn, message)
     end
