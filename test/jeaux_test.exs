@@ -12,6 +12,21 @@ defmodule JeauxTest do
     assert result[:foo] === "bar"
   end
 
+  test "does not apply defaults when param is present" do
+    params = %{"limit" => "2", "sort_by" => "name", "sort_dir" => "asc"}
+    schema = %{
+      limit: [type: :integer, default: 10, min: 1, max: 100],
+      offset: [type: :integer, default: 0, min: 0],
+      sort_by: [type: :string, default: "created_at"],
+      sort_dir: [type: :string, default: "asc"]
+    }
+
+    {status, result} = Jeaux.validate(params, schema)
+
+    assert status === :ok
+    assert result[:sort_by] === "name"
+  end
+
   test "throws error when required params not present" do
     params = %{}
     schema = %{foo!: :string}
@@ -126,5 +141,45 @@ defmodule JeauxTest do
     assert result[:lat]    === 0.0
     assert result[:lon]    === 0.0
     assert result[:radius] === 100
+  end
+
+  test "makes sure a value is valid" do
+    params = %{foo: 1}
+    schema = %{foo!: [type: :integer, valid: 1]}
+
+    {status, result} = Jeaux.validate(params, schema)
+
+    assert status === :ok
+    assert result[:foo] === 1
+  end
+
+  test "makes sure a value is valid with a list of options" do
+    params = %{foo: 1}
+    schema = %{foo!: [type: :integer, valid: [1, 2]]}
+
+    {status, result} = Jeaux.validate(params, schema)
+
+    assert status === :ok
+    assert result[:foo] === 1
+  end
+
+  test "throws error when param is not a valid value" do
+    params = %{foo: 1}
+    schema = %{foo!: [type: :integer, valid: 2]}
+
+    {status, message} = Jeaux.validate(params, schema)
+
+    assert status === :error
+    assert message === "foo is not a valid value."
+  end
+
+  test "throws error when param is not a valid value with a list of valids" do
+    params = %{foo: 1}
+    schema = %{foo!: [type: :integer, valid: [2, 3]]}
+
+    {status, message} = Jeaux.validate(params, schema)
+
+    assert status === :error
+    assert message === "foo is not a valid value."
   end
 end

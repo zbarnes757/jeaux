@@ -8,6 +8,7 @@ defmodule Jeaux.Params do
     |> validate_types(schema)
     |> validate_min(schema)
     |> validate_max(schema)
+    |> validate_valid(schema)
   end
 
   defp keys_to_atoms(params) do
@@ -30,8 +31,7 @@ defmodule Jeaux.Params do
       schema
       |> Enum.filter(fn({_k, v}) -> Keyword.get(v, :default) !== nil end)
       |> Keyword.keys
-      |> Enum.drop_while(fn(default) -> Enum.member?(param_keys, default) end)
-
+      |> Enum.filter(&(!Enum.member?(param_keys, &1)))
 
     add_defaults(params, schema, default_schema_keys)
   end
@@ -150,6 +150,37 @@ defmodule Jeaux.Params do
         true  -> [] ++ error_list
         false -> [{:error, "#{k} must be less than or equal to #{maximum}"}] ++ error_list
       end
+    end
+
+    case Enum.empty?(errors) do
+      true  -> {:ok, params}
+      false ->
+        [first_error | _tail ] = errors
+        first_error
+    end
+  end
+
+  defp validate_valid({:error, message}, _schema), do: {:error, message}
+  defp validate_valid({:ok, params}, schema) do
+    valid_keys =
+      schema
+      |> Enum.filter(fn({_k, v}) -> Keyword.get(v, :valid) !== nil end)
+      |> Keyword.keys
+
+    errors = Enum.reduce valid_keys, [], fn k, error_list ->
+      vals = Keyword.get(schema[k], :valid)
+
+      valid_values =
+        case is_list(vals) do
+          true  -> vals
+          false -> [vals]
+        end
+
+      case Enum.any?(valid_values, &(&1 === params[k])) do
+        true  -> [] ++ error_list
+        false -> [{:error, "#{k} is not a valid value."}]
+      end
+
     end
 
     case Enum.empty?(errors) do
