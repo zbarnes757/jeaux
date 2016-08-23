@@ -13,7 +13,7 @@ Jeaux is my attempt at building a light and easy schema validator.
 
     ```elixir
     def deps do
-      [{:jeaux, "~> 0.3.0"}]
+      [{:jeaux, "~> 0.4.0"}]
     end
     ```
 
@@ -26,7 +26,10 @@ Example:
 @params_schema %{
   lat!: :float,
   lon!: :float,
-  radius: [type: :integer, default: 100, min: 1, max: 100]
+  radius: [type: :integer, default: 100, min: 1, max: 100],
+  properties: %{
+    name: :string
+  }
 }
 
 def index(conn, params) do
@@ -40,7 +43,7 @@ end
 Using a `!` in your key denotes it is required.
 
 Currently, the following keys are valid:
-* `type:` with `:integer`, `:string`, or `:float` as applicable types
+* `type:` with `:integer`, `:string`, `:float`, or `:list` as applicable types
 * `default:` Sets a default value if none is currently provided in params
 * `min:` Minimum value a param can have
 * `max:` Maximum value a param can have
