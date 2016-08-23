@@ -182,4 +182,62 @@ defmodule JeauxTest do
     assert status === :error
     assert message === "foo is not a valid value."
   end
+
+  test "handles nested schema validation" do
+    params = %{
+      "type" => "Feature",
+      "geometry" => %{
+        "type" => "Point",
+        "coordinates" => [125.6, 10.1]
+      },
+      "properties" => %{
+        "name": "Dinagat Islands"
+      }
+    }
+
+    schema = %{
+      type!: :string,
+      geometry: %{
+        type!: :string,
+        coordinates: :list
+      },
+      properties: %{
+        name: :string
+      }
+    }
+
+    {status, result} = Jeaux.validate(params, schema)
+
+    assert status === :ok
+    assert result[:geometry][:type] === "Point"
+  end
+
+  test "handles errors in nested schema validation" do
+    params = %{
+      "type" => "Feature",
+      "geometry" => %{
+        "type" => "Point",
+        "coordinates" => "[125.6, 10.1]"
+      },
+      "properties" => %{
+        "name": "Dinagat Islands"
+      }
+    }
+
+    schema = %{
+      type!: :string,
+      geometry: %{
+        type!: :string,
+        coordinates: :list
+      },
+      properties: %{
+        name: :string
+      }
+    }
+
+    {status, message} = Jeaux.validate(params, schema)
+
+    assert status === :error
+    assert message === "coordinates must be a list."
+  end
 end

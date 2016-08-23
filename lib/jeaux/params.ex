@@ -9,6 +9,7 @@ defmodule Jeaux.Params do
     |> validate_min(schema)
     |> validate_max(schema)
     |> validate_valid(schema)
+    |> validate_nested(schema)
   end
 
   defp keys_to_atoms(params) do
@@ -18,9 +19,18 @@ defmodule Jeaux.Params do
 
   defp convert_all_keys([], _params), do: %{}
   defp convert_all_keys([k | tail], params) do
-    case is_binary(k) do
-      true  -> Map.put(convert_all_keys(tail, params), String.to_atom(k) , params[k])
-      false -> Map.put(convert_all_keys(tail, params), k, params[k])
+    cond do
+      is_binary(k) && is_map(params[k]) ->
+        Map.put(convert_all_keys(tail, params), String.to_atom(k), keys_to_atoms(params[k]))
+
+      is_map(params[k]) ->
+        Map.put(convert_all_keys(tail, params), k, keys_to_atoms(params[k]))
+
+      is_binary(k) ->
+        Map.put(convert_all_keys(tail, params), String.to_atom(k), params[k])
+
+      true ->
+        Map.put(convert_all_keys(tail, params), k, params[k])
     end
   end
 
@@ -29,7 +39,12 @@ defmodule Jeaux.Params do
 
     default_schema_keys =
       schema
-      |> Enum.filter(fn({_k, v}) -> Keyword.get(v, :default) !== nil end)
+      |> Enum.filter(fn({_k, v}) ->
+        case is_map(v)  do
+          true  -> false
+          false -> Keyword.get(v, :default) !== nil
+        end
+      end)
       |> Keyword.keys
       |> Enum.filter(&(!Enum.member?(param_keys, &1)))
 
@@ -41,7 +56,12 @@ defmodule Jeaux.Params do
 
     compared_params =
       schema
-      |> Enum.filter(fn({_k, v}) -> Keyword.get(v, :required) === true end)
+      |> Enum.filter(fn({_k, v}) ->
+        case is_map(v) do
+          true  -> false
+          false -> Keyword.get(v, :required) === true
+        end
+      end)
       |> Keyword.keys
       |> Enum.drop_while(fn(required_param) -> Enum.member?(param_keys, required_param) end)
 
@@ -63,7 +83,11 @@ defmodule Jeaux.Params do
   defp validate_types({:error, message}, _schema), do: {:error, message}
   defp validate_types({:ok, params}, schema) do
     errors = Enum.reduce params, [], fn {k, v}, error_list  ->
-      type = Keyword.get(schema[k] || [], :type)
+      type =
+        case is_map(schema[k])  do
+          true  -> nil
+          false -> Keyword.get(schema[k] || [], :type)
+        end
 
       validate_type({k, v}, schema[k], type) ++ error_list
     end
@@ -78,10 +102,15 @@ defmodule Jeaux.Params do
 
   defp check_and_format_types(params, _schema, []), do: params
   defp check_and_format_types(params, schema, [k | tail]) do
-    expected_type = Keyword.get(schema[k] || [], :type)
+    expected_type =
+      case is_map(schema[k]) do
+        true  -> nil
+        false -> Keyword.get(schema[k] || [], :type)
+      end
 
     is_expected? =
       case expected_type do
+        :list    -> is_list(params[k])
         :string  -> is_binary(params[k])
         :float   -> is_float(params[k])
         :integer -> is_integer(params[k])
@@ -111,12 +140,18 @@ defmodule Jeaux.Params do
     end
   end
   defp try_to_parse(value, :integer) when is_float(value), do: round(value)
+  defp try_to_parse(value, :list), do: value
 
   defp validate_min({:error, message}, _schema), do: {:error, message}
   defp validate_min({:ok, params}, schema) do
     minimum_schema_keys =
       schema
-      |> Enum.filter(fn({_k, v}) -> Keyword.get(v, :min) !== nil end)
+      |> Enum.filter(fn({_k, v}) ->
+        case is_map(v) do
+          true  -> false
+          false -> Keyword.get(v, :min) !== nil
+        end
+      end)
       |> Keyword.keys
 
     errors = Enum.reduce minimum_schema_keys, [], fn k, error_list  ->
@@ -140,7 +175,12 @@ defmodule Jeaux.Params do
   defp validate_max({:ok, params}, schema) do
     maximum_schema_keys =
       schema
-      |> Enum.filter(fn({_k, v}) -> Keyword.get(v, :max) !== nil end)
+      |> Enum.filter(fn({_k, v}) ->
+        case is_map(v) do
+          true  -> false
+          false -> Keyword.get(v, :max) !== nil
+        end
+      end)
       |> Keyword.keys
 
     errors = Enum.reduce maximum_schema_keys, [], fn k, error_list  ->
@@ -164,7 +204,12 @@ defmodule Jeaux.Params do
   defp validate_valid({:ok, params}, schema) do
     valid_keys =
       schema
-      |> Enum.filter(fn({_k, v}) -> Keyword.get(v, :valid) !== nil end)
+      |> Enum.filter(fn({_k, v}) ->
+        case is_map(v) do
+          true  -> false
+          false -> Keyword.get(v, :valid) !== nil
+        end
+      end)
       |> Keyword.keys
 
     errors = Enum.reduce valid_keys, [], fn k, error_list ->
@@ -214,10 +259,43 @@ defmodule Jeaux.Params do
     end
   end
 
+  defp validate_type({k, v}, _schema, :list) do
+    case is_list(v) do
+      true  -> []
+      false -> [{:error, "#{k} must be a list."}]
+    end
+  end
+
   defp add_defaults(params, _schema, []), do: params
   defp add_defaults(params, schema, [k | tail]) do
     default = Keyword.get(schema[k], :default)
 
     Map.put(add_defaults(params, schema, tail), k, default)
+  end
+
+  defp validate_nested({:error, message}, _schema), do: {:error, message}
+  defp validate_nested({:ok, params}, schema) do
+    keys_with_maps =
+      schema
+      |> Enum.filter(fn({_k, v}) -> is_map(v) end)
+      |> Keyword.keys
+
+    case each_nested(keys_with_maps, params, schema) do
+      {:error, message} -> {:error, message}
+      new_params        -> {:ok, new_params}
+    end
+  end
+
+  defp each_nested([], params, _schema), do: params
+  defp each_nested([k | tail], params, schema) do
+    case is_map(params[k]) do
+      true  ->
+        case Jeaux.validate(params[k], schema[k]) do
+          {:ok, new_params} -> Map.put(each_nested(tail, params, schema), k, new_params)
+          {:error, message} -> {:error, message}
+        end
+
+      false -> {:error, "expected #{k} to be a map"}
+    end
   end
 end
