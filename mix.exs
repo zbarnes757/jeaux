@@ -20,7 +20,8 @@ defmodule Jeaux.Mixfile do
   defp deps do
     [
       {:ex_doc, ">= 0.0.0", only: :dev},
-      {:excoveralls, "~> 0.5", only: :test}
+      {:excoveralls, "~> 0.5", only: :test},
+      {:credo, "~> 0.4", only: [:dev, :test]}
     ]
   end
 

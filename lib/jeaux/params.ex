@@ -68,7 +68,7 @@ defmodule Jeaux.Params do
     case Enum.empty?(compared_params) do
       true  -> {:ok, params}
       false ->
-        [first_required_param | _tail ] = compared_params
+        [first_required_param | _tail] = compared_params
         {:error, "#{first_required_param} is required."}
     end
   end
@@ -95,7 +95,7 @@ defmodule Jeaux.Params do
     case Enum.empty?(errors) do
       true  -> {:ok, params}
       false ->
-        [first_error | _tail ] = errors
+        [first_error | _tail] = errors
         first_error
     end
   end
@@ -166,7 +166,7 @@ defmodule Jeaux.Params do
     case Enum.empty?(errors) do
       true  -> {:ok, params}
       false ->
-        [first_error | _tail ] = errors
+        [first_error | _tail] = errors
         first_error
     end
   end
@@ -195,7 +195,7 @@ defmodule Jeaux.Params do
     case Enum.empty?(errors) do
       true  -> {:ok, params}
       false ->
-        [first_error | _tail ] = errors
+        [first_error | _tail] = errors
         first_error
     end
   end
@@ -231,7 +231,7 @@ defmodule Jeaux.Params do
     case Enum.empty?(errors) do
       true  -> {:ok, params}
       false ->
-        [first_error | _tail ] = errors
+        [first_error | _tail] = errors
         first_error
     end
   end
