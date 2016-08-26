@@ -13,7 +13,7 @@ Jeaux is my attempt at building a light and easy schema validator.
 
     ```elixir
     def deps do
-      [{:jeaux, "~> 0.4.0"}]
+      [{:jeaux, "~> 0.5.0"}]
     end
     ```
 
@@ -43,7 +43,7 @@ end
 Using a `!` in your key denotes it is required.
 
 Currently, the following keys are valid:
-* `type:` with `:integer`, `:string`, `:float`, or `:list` as applicable types
+* `type:` with `:integer`, `:string`, `:guid` (`:string` type is implied), `:float`, or `:list` as applicable types
 * `default:` Sets a default value if none is currently provided in params
 * `min:` Minimum value a param can have
 * `max:` Maximum value a param can have

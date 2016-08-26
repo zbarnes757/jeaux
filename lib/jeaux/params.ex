@@ -112,6 +112,7 @@ defmodule Jeaux.Params do
       case expected_type do
         :list    -> is_list(params[k])
         :string  -> is_binary(params[k])
+        :guid    -> is_binary(params[k])
         :float   -> is_float(params[k])
         :integer -> is_integer(params[k])
         nil      -> true
@@ -126,6 +127,7 @@ defmodule Jeaux.Params do
   end
 
   defp try_to_parse(value, :string), do: to_string(value)
+  defp try_to_parse(value, :guid), do: to_string(value)
   defp try_to_parse(value, :float) when is_integer(value), do: String.to_float("#{value}.0")
   defp try_to_parse(value, :float) when is_binary(value) do
     case Float.parse(value)  do
@@ -266,6 +268,13 @@ defmodule Jeaux.Params do
     end
   end
 
+  defp validate_type({k, v}, _schema, :guid) do
+    case guid_match?(v) do
+      true  -> []
+      false -> [{:error, "#{k} must be in valid guid format."}]
+    end
+  end
+
   defp add_defaults(params, _schema, []), do: params
   defp add_defaults(params, schema, [k | tail]) do
     default = Keyword.get(schema[k], :default)
@@ -297,5 +306,10 @@ defmodule Jeaux.Params do
 
       false -> {:error, "expected #{k} to be a map"}
     end
+  end
+
+  defp guid_match?(v) do
+    Regex.match?(~r/\A[A-F0-9]{8}(?:-?[A-F0-9]{4}){3}-?[A-F0-9]{12}\z/i, v) ||
+    Regex.match?(~r/\A\{[A-F0-9]{8}(?:-?[A-F0-9]{4}){3}-?[A-F0-9]{12}\}\z/i, v)
   end
 end

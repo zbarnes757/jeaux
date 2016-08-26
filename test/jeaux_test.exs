@@ -240,4 +240,31 @@ defmodule JeauxTest do
     assert status === :error
     assert message === "coordinates must be a list."
   end
+
+  test "asserts a value is a valid guid" do
+    params = %{foo: "0e14f2db-ff0b-43bd-b88c-01b9f226778f"}
+    schema = %{foo!: :guid}
+
+    {status, result} = Jeaux.validate(params, schema)
+
+    assert status === :ok
+    assert result[:foo] === "0e14f2db-ff0b-43bd-b88c-01b9f226778f"
+
+    params2 = %{foo: "{D1A5279D-B27D-4CD4-A05E-EFDD53D08E8D}"}
+
+    {status, result} = Jeaux.validate(params2, schema)
+
+    assert status === :ok
+    assert result[:foo] === "{D1A5279D-B27D-4CD4-A05E-EFDD53D08E8D}"
+  end
+
+  test "throws an error when a value is not a valid guid" do
+    params = %{foo: "some-string"}
+    schema = %{foo!: :guid}
+
+    {status, message} = Jeaux.validate(params, schema)
+
+    assert status === :error
+    assert message === "foo must be in valid guid format."
+  end
 end
