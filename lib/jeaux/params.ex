@@ -142,6 +142,7 @@ defmodule Jeaux.Params do
     end
   end
   defp try_to_parse(value, :integer) when is_float(value), do: round(value)
+  defp try_to_parse(value, :list) when is_binary(value), do: String.split(value, ",")
   defp try_to_parse(value, :list), do: value
 
   defp validate_min({:error, message}, _schema), do: {:error, message}

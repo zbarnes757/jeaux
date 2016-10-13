@@ -237,7 +237,7 @@ defmodule JeauxTest do
       "type" => "Feature",
       "geometry" => %{
         "type" => "Point",
-        "coordinates" => "[125.6, 10.1]"
+        "coordinates" => 90.0
       },
       "properties" => %{
         "name": "Dinagat Islands"
@@ -259,6 +259,16 @@ defmodule JeauxTest do
 
     assert status === :error
     assert message === "coordinates must be a list."
+  end
+
+  test "coerces a query string array into list type" do
+    params = %{"array" => "-96.7915,32.78,-96.785,32.783"}
+    schema = %{array!: :list}
+
+    {status, result} = Jeaux.validate(params, schema)
+
+    assert status === :ok
+    assert result[:array] === ["-96.7915", "32.78", "-96.785", "32.783"]
   end
 
   test "asserts a value is a valid guid" do

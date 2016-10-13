@@ -13,11 +13,9 @@ Jeaux is my attempt at building a light and easy schema validator.
 
     ```elixir
     def deps do
-      [{:jeaux, "~> 0.5.0"}]
+      [{:jeaux, "~> 0.5.1"}]
     end
     ```
-
-Right now it only supports validating params but I would like to be able to deep validate payloads as well.
 
 Example:
 
@@ -48,6 +46,8 @@ Currently, the following keys are valid:
 * `min:` Minimum value a param can have
 * `max:` Maximum value a param can have
 * `valid:` Values that are valid options. Can be a single item or a list.
+
+For `:list` types, if passed an array from a query string (a la `foo=1,2,3`), it will parse into a list (`['1', '2', '3']`). I am still working on finding a way to coerce these into the types they should be.
 
 It is important to note that no matter how params are passed in to Jeaux, they will be returned with keys as atoms.
 
