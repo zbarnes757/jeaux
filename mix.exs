@@ -3,7 +3,7 @@ defmodule Jeaux.Mixfile do
 
   def project do
     [app: :jeaux,
-     version: "0.5.1",
+     version: "0.5.2",
      elixir: "~> 1.2",
      description: description,
      package: package,

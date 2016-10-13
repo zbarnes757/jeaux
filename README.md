@@ -13,7 +13,7 @@ Jeaux is my attempt at building a light and easy schema validator.
 
     ```elixir
     def deps do
-      [{:jeaux, "~> 0.5.1"}]
+      [{:jeaux, "~> 0.5.2"}]
     end
     ```
 

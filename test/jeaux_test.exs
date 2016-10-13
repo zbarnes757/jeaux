@@ -297,4 +297,14 @@ defmodule JeauxTest do
     assert status === :error
     assert message === "foo must be in valid guid format."
   end
+
+  test "applies defaults when value is nil" do
+    params = %{foo: nil}
+    schema = %{foo: [default: "bar"]}
+
+    {status, result} = Jeaux.validate(params, schema)
+
+    assert status === :ok
+    assert result[:foo] === "bar"
+  end
 end

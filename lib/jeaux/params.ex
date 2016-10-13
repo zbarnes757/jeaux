@@ -39,14 +39,14 @@ defmodule Jeaux.Params do
 
     default_schema_keys =
       schema
-      |> Enum.filter(fn({_k, v}) ->
+      |> Enum.filter(fn({k, v}) ->
         case is_map(v)  do
           true  -> false
           false -> Keyword.get(v, :default) !== nil
         end
       end)
       |> Keyword.keys
-      |> Enum.filter(&(!Enum.member?(param_keys, &1)))
+      |> Enum.filter(&(!Enum.member?(param_keys, &1) || params[&1] === nil))
 
     add_defaults(params, schema, default_schema_keys)
   end
