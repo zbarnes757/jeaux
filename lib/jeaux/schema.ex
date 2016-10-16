@@ -1,4 +1,6 @@
 defmodule Jeaux.Schema do
+  @moduledoc false
+
   def normalize_schema(dict) do
     Enum.reduce(dict, %{}, fn {k,v}, acc ->
       Map.merge(normalize_field({k, v}), acc)
@@ -10,7 +12,7 @@ defmodule Jeaux.Schema do
     required = String.ends_with?("#{k}", "!")
     name =
       "#{k}"
-      |> String.replace_trailing("!", "") 
+      |> String.replace_trailing("!", "")
       |> String.to_atom
 
     case is_atom(v) do

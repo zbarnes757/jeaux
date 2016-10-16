@@ -3,7 +3,7 @@
 [![Hex.pm](https://img.shields.io/hexpm/v/jeaux.svg)](https://hex.pm/packages/jeaux)
 [![Build Status](https://travis-ci.org/zbarnes757/jeaux.svg?branch=master)](https://travis-ci.org/zbarnes757/jeaux)
 
-Jeaux is my attempt at building a light and easy schema validator.
+Jeaux is a light and easy schema validator.
 
 ## Installation
 
@@ -13,7 +13,7 @@ Jeaux is my attempt at building a light and easy schema validator.
 
     ```elixir
     def deps do
-      [{:jeaux, "~> 0.5.2"}]
+      [{:jeaux, "~> 0.5.3"}]
     end
     ```
 

@@ -1,4 +1,6 @@
 defmodule Jeaux.Params do
+  @moduledoc false
+
   def compare(params, schema) do
     params
     |> keys_to_atoms
@@ -18,19 +20,18 @@ defmodule Jeaux.Params do
   end
 
   defp convert_all_keys([], _params), do: %{}
+  defp convert_all_keys([k | tail], params) when is_binary(k) do
+    if is_map(params[k]) do
+      Map.put(convert_all_keys(tail, params), String.to_atom(k), keys_to_atoms(params[k]))
+    else
+      Map.put(convert_all_keys(tail, params), String.to_atom(k), params[k])
+    end
+  end
   defp convert_all_keys([k | tail], params) do
-    cond do
-      is_binary(k) && is_map(params[k]) ->
-        Map.put(convert_all_keys(tail, params), String.to_atom(k), keys_to_atoms(params[k]))
-
-      is_map(params[k]) ->
-        Map.put(convert_all_keys(tail, params), k, keys_to_atoms(params[k]))
-
-      is_binary(k) ->
-        Map.put(convert_all_keys(tail, params), String.to_atom(k), params[k])
-
-      true ->
-        Map.put(convert_all_keys(tail, params), k, params[k])
+    if is_map(params[k]) do
+      Map.put(convert_all_keys(tail, params), k, keys_to_atoms(params[k]))
+    else
+      Map.put(convert_all_keys(tail, params), k, params[k])
     end
   end
 
@@ -39,7 +40,7 @@ defmodule Jeaux.Params do
 
     default_schema_keys =
       schema
-      |> Enum.filter(fn({k, v}) ->
+      |> Enum.filter(fn({_k, v}) ->
         case is_map(v)  do
           true  -> false
           false -> Keyword.get(v, :default) !== nil
