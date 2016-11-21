@@ -116,6 +116,7 @@ defmodule Jeaux.Params do
         :guid    -> is_binary(params[k])
         :float   -> is_float(params[k])
         :integer -> is_integer(params[k])
+        :boolean -> is_boolean(params[k])
         nil      -> true
       end
 
@@ -145,6 +146,10 @@ defmodule Jeaux.Params do
   defp try_to_parse(value, :integer) when is_float(value), do: round(value)
   defp try_to_parse(value, :list) when is_binary(value), do: String.split(value, ",")
   defp try_to_parse(value, :list), do: value
+  defp try_to_parse("true", :boolean), do: true
+  defp try_to_parse("false", :boolean), do: false
+  defp try_to_parse(value, :boolean), do: value
+
 
   defp validate_min({:error, message}, _schema), do: {:error, message}
   defp validate_min({:ok, params}, schema) do
@@ -274,6 +279,13 @@ defmodule Jeaux.Params do
     case guid_match?(v) do
       true  -> []
       false -> [{:error, "#{k} must be in valid guid format."}]
+    end
+  end
+
+  defp validate_type({k, v}, _schema, :boolean) do
+    case is_boolean(v) do
+      true  -> []
+      false -> [{:error, "#{k} must be a boolean."}]
     end
   end
 

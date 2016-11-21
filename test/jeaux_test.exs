@@ -307,4 +307,34 @@ defmodule JeauxTest do
     assert status === :ok
     assert result[:foo] === "bar"
   end
+
+  test "accepts boolean types" do
+    params = %{foo: true}
+    schema = %{foo: :boolean}
+
+    {status, result} = Jeaux.validate(params, schema)
+
+    assert status === :ok
+    assert result[:foo] === true
+  end
+
+  test "coerces boolean types if in schema" do
+    params = %{foo: "true"}
+    schema = %{foo: :boolean}
+
+    {status, result} = Jeaux.validate(params, schema)
+
+    assert status === :ok
+    assert result[:foo] === true
+  end
+
+  test "throws error if not a boolean" do
+    params = %{foo: 123}
+    schema = %{foo: :boolean}
+
+    {status, message} = Jeaux.validate(params, schema)
+
+    assert status === :error
+    assert message === "foo must be a boolean."
+  end
 end
