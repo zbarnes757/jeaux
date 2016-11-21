@@ -25,6 +25,7 @@ Example:
   lat!: :float,
   lon!: :float,
   radius: [type: :integer, default: 100, min: 1, max: 100],
+  is_point: :boolean,
   properties: %{
     name: :string
   }
