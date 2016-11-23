@@ -14,4 +14,5 @@
   "mimerl": {:hex, :mimerl, "1.0.2", "993f9b0e084083405ed8252b99460c4f0563e41729ab42d9074fd5e52439be88", [:rebar3], []},
   "params": {:hex, :params, "2.0.1", "10cbc61dcdeb0fdc7d8f28788867da83038f8b6f494094547e581f637126e06b", [:mix], [{:ecto, "~> 2.0.1", [hex: :ecto, optional: false]}]},
   "poolboy": {:hex, :poolboy, "1.5.1", "6b46163901cfd0a1b43d692657ed9d7e599853b3b21b95ae5ae0a777cf9b6ca8", [:rebar], []},
+  "proper_case": {:hex, :proper_case, "1.0.0", "ee003e3b5e0cc17fafed8d6b422b10741cdc291a1b71b49bfe3afdcf04601e6b", [:mix], []},
   "ssl_verify_fun": {:hex, :ssl_verify_fun, "1.1.0", "edee20847c42e379bf91261db474ffbe373f8acb56e9079acb6038d4e0bf414f", [:make, :rebar], []}}

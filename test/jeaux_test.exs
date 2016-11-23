@@ -337,4 +337,19 @@ defmodule JeauxTest do
     assert status === :error
     assert message === "foo must be a boolean."
   end
+
+  test "accepts camelCase params and converts to snake_case" do
+    params = %{"limit" => "2", "sortBy" => "name", "sortDir" => "asc"}
+    schema = %{
+      limit: [type: :integer, default: 10, min: 1, max: 100],
+      offset: [type: :integer, default: 0, min: 0],
+      sort_by: [type: :string, default: "created_at"],
+      sort_dir: [type: :string, default: "asc"]
+    }
+
+    {status, result} = Jeaux.validate(params, schema)
+
+    assert status === :ok
+    assert result === %{limit: 2, offset: 0, sort_by: "name", sort_dir: "asc"}
+  end
 end

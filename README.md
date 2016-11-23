@@ -13,7 +13,7 @@ Jeaux is a light and easy schema validator.
 
     ```elixir
     def deps do
-      [{:jeaux, "~> 0.6.0"}]
+      [{:jeaux, "~> 0.7.0"}]
     end
     ```
 
@@ -50,7 +50,7 @@ Currently, the following keys are valid:
 
 For `:list` types, if passed an array from a query string (a la `foo=1,2,3`), it will parse into a list (`['1', '2', '3']`). I am still working on finding a way to coerce these into the types they should be.
 
-It is important to note that no matter how params are passed in to Jeaux, they will be returned with keys as atoms.
+Params must be a map but the keys can be strings or atoms and in camelCase or snake_case. They will always be returned as :snake_case keys, however.
 
 If you want to contribute, feel free to fork and open a pr.
 

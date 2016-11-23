@@ -3,6 +3,7 @@ defmodule Jeaux.Params do
 
   def compare(params, schema) do
     params
+    |> ProperCase.to_snake_case
     |> keys_to_atoms
     |> apply_defaults(schema)
     |> validate_required(schema)

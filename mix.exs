@@ -3,7 +3,7 @@ defmodule Jeaux.Mixfile do
 
   def project do
     [app: :jeaux,
-     version: "0.6.0",
+     version: "0.7.0",
      elixir: "~> 1.2",
      description: description,
      package: package,
@@ -19,6 +19,7 @@ defmodule Jeaux.Mixfile do
 
   defp deps do
     [
+      {:proper_case, "~> 1.0"},
       {:ex_doc, ">= 0.0.0", only: :dev},
       {:excoveralls, "~> 0.5", only: :test},
       {:credo, "~> 0.4", only: [:dev, :test]}
